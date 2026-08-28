@@ -21,7 +21,35 @@ function calculateStreak(rows) {
   return streak;
 }
 function renderStreak(rows) { const count = calculateStreak(rows); $("streak").textContent = `✦ ${count} day${count === 1 ? "" : "s"} streak`; }
-function loadStreak() { renderStreak(JSON.parse(localStorage.getItem(LOCAL_CHECKINS_KEY) || "[]")); }
+function renderHistory(rows) {
+  const today = new Date();
+  const days = [];
+  for (let offset = 6; offset >= 0; offset -= 1) {
+    const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() - offset);
+    const key = dayKey(date);
+    const dayRows = rows.filter((row) => dayKey(row.created_at || row.date) === key);
+    days.push({ label: offset === 0 ? "Today" : date.toLocaleDateString("en-US", { weekday: "short" }), count: dayRows.length, today: offset === 0 });
+  }
+  const max = Math.max(1, ...days.map((day) => day.count));
+  $("historyBars").innerHTML = days.map((day) => `<div class="${day.today ? "today" : ""} ${day.count === 0 ? "empty" : ""}"><i style="height:${day.count ? Math.max(16, (day.count / max) * 100) : 5}%"></i><span>${day.label}</span></div>`).join("");
+}
+
+async function loadRecords() {
+  const localRows = JSON.parse(localStorage.getItem(LOCAL_CHECKINS_KEY) || "[]");
+  renderStreak(localRows);
+  renderHistory(localRows);
+  try {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/mood_responses?select=created_at&order=created_at.desc`, {
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+    });
+    if (!response.ok) throw new Error(`Supabase returned ${response.status}`);
+    const remoteRows = await response.json();
+    renderStreak(remoteRows);
+    renderHistory(remoteRows);
+  } catch (error) {
+    console.error("Unable to load saved mood records:", error);
+  }
+}
 document.querySelectorAll(".mood-option").forEach((button) => button.addEventListener("click", () => {
   const mood = moods[button.dataset.mood];
   document.querySelectorAll(".mood-option").forEach((item) => item.classList.toggle("active", item === button));
@@ -54,6 +82,7 @@ saveButton.addEventListener("click", async () => {
     checkins.push({ created_at: new Date().toISOString() });
     localStorage.setItem(LOCAL_CHECKINS_KEY, JSON.stringify(checkins));
     renderStreak(checkins);
+    renderHistory(checkins);
     $("savedMessage").textContent = "Saved securely to Rara's mood journal.";
     saveButton.textContent = "Saved ✓";
   } catch (error) {
@@ -66,4 +95,4 @@ saveButton.addEventListener("click", async () => {
   }
 });
 $("themeButton").addEventListener("click", () => document.body.classList.toggle("dark"));
-loadStreak();
+loadRecords();
