@@ -1,96 +1,60 @@
-const moods = {
-  sleepy: { score: 34, title: "Moving gently", description: "Your only job today can be taking care of you." },
-  okay: { score: 58, title: "Steady and okay", description: "Not every day needs to be extraordinary." },
-  bright: { score: 82, title: "Feeling bright", description: "A little sunshine is finding its way in." },
-  sparkly: { score: 96, title: "Extra sparkly", description: "You are carrying some lovely energy today." }
-};
-const SUPABASE_URL = "https://lbcubdivdriyauwqjrpc.supabase.co";
-const SUPABASE_KEY = "sb_publishable_teySu7QZtls5z8EZmNscxw_5C-yMsY8";
-const $ = (id) => document.getElementById(id);
-const LOCAL_CHECKINS_KEY = "rara-mood-checkins";
+const display = document.getElementById("display");
+const expression = document.getElementById("expression");
+let current = "0";
+let previous = null;
+let operator = null;
+let waitingForNumber = false;
 
-function dayKey(date) {
-  const value = new Date(date);
-  return `${value.getFullYear()}-${value.getMonth()}-${value.getDate()}`;
+function updateDisplay() {
+  display.textContent = current;
+  expression.textContent = previous !== null && operator ? `${previous} ${operator}` : "";
 }
 
-function calculateStreak(rows) {
-  const days = new Set(rows.map((row) => dayKey(row.created_at || row.date)));
-  const today = new Date();
-  let streak = 0;
-  const cursor = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  while (days.has(dayKey(cursor))) {
-    streak += 1;
-    cursor.setDate(cursor.getDate() - 1);
-  }
-  return streak;
+function inputNumber(value) {
+  if (waitingForNumber) { current = value; waitingForNumber = false; }
+  else if (value === "." && current.includes(".")) return;
+  else current = current === "0" && value !== "." ? value : current + value;
+  updateDisplay();
 }
 
-function renderStreak(rows) {
-  const count = calculateStreak(rows);
-  $("streak").textContent = `✦ ${count} day${count === 1 ? "" : "s"} streak`;
+function calculate() {
+  if (previous === null || !operator) return;
+  const left = Number(previous);
+  const right = Number(current);
+  let result;
+  if (operator === "+") result = left + right;
+  if (operator === "−") result = left - right;
+  if (operator === "×") result = left * right;
+  if (operator === "÷") result = right === 0 ? "Error" : left / right;
+  current = result === "Error" ? result : String(Number(result.toFixed(10)));
+  previous = null; operator = null; waitingForNumber = true; updateDisplay();
 }
 
-async function loadStreak() {
-  const localRows = JSON.parse(localStorage.getItem(LOCAL_CHECKINS_KEY) || "[]");
-  renderStreak(localRows);
-  try {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/mood_responses?select=created_at&order=created_at.desc`, {
-      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
-    });
-    if (response.ok) {
-      renderStreak(await response.json());
-    }
-  } catch (error) {
-    console.error("Unable to load mood streak:", error);
-  }
+function chooseOperator(nextOperator) {
+  if (current === "Error") return;
+  if (operator && !waitingForNumber) calculate();
+  previous = current; operator = nextOperator; waitingForNumber = true; updateDisplay();
 }
-document.querySelectorAll(".mood-option").forEach((button) => button.addEventListener("click", () => {
-  const mood = moods[button.dataset.mood];
-  document.querySelectorAll(".mood-option").forEach((item) => item.classList.toggle("active", item === button));
-  $("score").textContent = mood.score;
-  $("moodTitle").textContent = mood.title;
-  $("moodDescription").textContent = mood.description;
-  $("meterFill").style.width = `${mood.score}%`;
+
+document.querySelectorAll(".key").forEach((button) => button.addEventListener("click", () => {
+  const value = button.dataset.value;
+  const action = button.dataset.action;
+  if (value && /\d|\./.test(value)) inputNumber(value);
+  else if (value) chooseOperator(value);
+  else if (action === "clear") { current = "0"; previous = null; operator = null; waitingForNumber = false; updateDisplay(); }
+  else if (action === "sign" && current !== "0" && current !== "Error") current = String(Number(current) * -1), updateDisplay();
+  else if (action === "percent" && current !== "Error") current = String(Number(current) / 100), updateDisplay();
+  else if (action === "equals") calculate();
 }));
-document.querySelectorAll(".chip").forEach((chip) => chip.addEventListener("click", () => chip.classList.toggle("selected")));
-const saveButton = $("saveButton");
-saveButton.addEventListener("click", async () => {
-  const activeMood = document.querySelector(".mood-option.active");
-  const selectedFeelings = [...document.querySelectorAll(".chip.selected")].map((chip) => chip.dataset.feeling);
-  saveButton.disabled = true;
-  saveButton.textContent = "Saving...";
-  try {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/mood_responses`, {
-      method: "POST",
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`,
-        "Content-Type": "application/json",
-        Prefer: "return=minimal"
-      },
-      body: JSON.stringify({
-        mood: activeMood.dataset.mood,
-        feeling: selectedFeelings.join(", "),
-        journal: $("journal").value.trim()
-      })
-    });
-    if (!response.ok) {
-      throw new Error(`Supabase returned ${response.status}`);
-    }
-    const checkins = JSON.parse(localStorage.getItem(LOCAL_CHECKINS_KEY) || "[]");
-    checkins.push({ created_at: new Date().toISOString() });
-    localStorage.setItem(LOCAL_CHECKINS_KEY, JSON.stringify(checkins));
-    renderStreak(checkins);
-    $("savedMessage").textContent = "Saved securely to your mood journal.";
-    saveButton.textContent = "Saved ✓";
-  } catch (error) {
-    console.error("Unable to save mood check-in:", error);
-    $("savedMessage").textContent = "Could not save. Check your Supabase table and permissions.";
-    saveButton.innerHTML = 'Try again <span>↻</span>';
-  } finally {
-    saveButton.disabled = false;
-  }
+
+document.addEventListener("keydown", (event) => {
+  if (/^\d$/.test(event.key) || event.key === ".") inputNumber(event.key);
+  else if (["+", "-", "*", "/"].includes(event.key)) chooseOperator({ "*": "×", "/": "÷", "-": "−", "+": "+" }[event.key]);
+  else if (event.key === "Enter" || event.key === "=") calculate();
+  else if (event.key === "Escape") document.querySelector('[data-action="clear"]').click();
+  else if (event.key === "%") document.querySelector('[data-action="percent"]').click();
+  else return;
+  event.preventDefault();
 });
-$("themeButton").addEventListener("click", () => document.body.classList.toggle("dark"));
-loadStreak();
+document.getElementById("themeButton").addEventListener("click", () => document.body.classList.toggle("dark"));
+updateDisplay();
