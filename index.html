@@ -3,25 +3,55 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Simple Calculator</title>
+    <title>Rara Mood Meter</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800&family=Manrope:wght@800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css?v=4" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css?v=5" />
   </head>
   <body>
-    <main class="calculator" aria-label="Calculator">
-      <header class="topbar"><div class="brand"><span>+</span> calculate</div><button id="themeButton" class="theme-button" aria-label="Toggle dark mode">☼</button></header>
-      <section class="display" aria-live="polite"><div id="expression" class="expression"></div><div id="display" class="display-value">0</div></section>
-      <section class="keypad">
-        <button class="key utility" data-action="clear">AC</button><button class="key utility" data-action="sign">+/-</button><button class="key utility" data-action="percent">%</button><button class="key operator" data-value="÷">÷</button>
-        <button class="key" data-value="7">7</button><button class="key" data-value="8">8</button><button class="key" data-value="9">9</button><button class="key operator" data-value="×">×</button>
-        <button class="key" data-value="4">4</button><button class="key" data-value="5">5</button><button class="key" data-value="6">6</button><button class="key operator" data-value="−">−</button>
-        <button class="key" data-value="1">1</button><button class="key" data-value="2">2</button><button class="key" data-value="3">3</button><button class="key operator" data-value="+">+</button>
-        <button class="key zero" data-value="0">0</button><button class="key" data-value=".">.</button><button class="key equals" data-action="equals">=</button>
+    <div class="glow glow-one"></div><div class="glow glow-two"></div>
+    <main class="page">
+      <header class="topbar">
+        <a class="brand" href="#"><span class="brand-icon">☻</span> rara <span class="brand-muted">/ mood meter</span></a>
+        <button class="theme-button" id="themeButton" aria-label="Toggle theme">☼</button>
+      </header>
+      <section class="intro">
+        <p class="eyebrow">A TINY CHECK-IN FOR A BIG FEELING</p>
+        <h1>How are you feeling<br /><em>today, Rara?</em></h1>
+        <p class="subtext">No pressure. Just notice what is already there.</p>
       </section>
-      <p class="hint">Tip: you can also use your keyboard</p>
+      <section class="meter-card">
+        <div class="meter-top"><div><p class="eyebrow">YOUR MOOD METER</p><h2 id="moodTitle">Feeling bright</h2><p id="moodDescription">A little sunshine is finding its way in.</p></div><div class="score"><span id="score">82</span><small>/ 100</small></div></div>
+        <div class="meter-bar"><div id="meterFill"></div></div>
+        <div class="meter-labels"><span>low energy</span><span>feeling good</span><span>over the moon</span></div>
+        <div class="mood-options" role="group" aria-label="Choose your mood">
+          <button class="mood-option" data-mood="sleepy"><span>☾</span><b>Sleepy</b><small>need a soft day</small></button>
+          <button class="mood-option" data-mood="okay"><span>☁</span><b>Okay</b><small>taking it easy</small></button>
+          <button class="mood-option active" data-mood="bright"><span>☀</span><b>Bright</b><small>good things glow</small></button>
+          <button class="mood-option" data-mood="sparkly"><span>✦</span><b>Sparkly</b><small>full of little magic</small></button>
+        </div>
+      </section>
+      <div class="content-grid">
+        <section class="card checkin-card">
+          <div class="card-heading"><div><p class="eyebrow">A QUICK CHECK-IN</p><h2>What is taking up space?</h2></div><span class="tiny-sparkle">✦</span></div>
+          <div class="chips" id="chips">
+            <button class="chip" data-feeling="rest">I need rest</button><button class="chip" data-feeling="small win">A small win</button><button class="chip" data-feeling="connection">I feel connected</button><button class="chip" data-feeling="creative">Feeling creative</button><button class="chip" data-feeling="curious">A little curious</button><button class="chip" data-feeling="heavy">Something feels heavy</button>
+          </div>
+          <label class="journal-label" for="journal">One sentence, if you want:</label>
+          <textarea id="journal" rows="3" placeholder="Today I noticed..."></textarea>
+          <div class="checkin-footer"><span id="savedMessage">Your check-in stays right here.</span><button class="save-button" id="saveButton">Save check-in <span>→</span></button></div>
+        </section>
+        <aside class="card note-card">
+          <div class="note-orb">✦</div><p class="eyebrow">A NOTE FOR YOU</p><h2>You don't have to<br />earn your rest.</h2><p>Being where you are is enough. Let today be a little lighter than yesterday.</p><div class="note-sign">with care, <b>rara</b> ♡</div>
+        </aside>
+      </div>
+      <section class="history">
+        <div class="section-heading"><div><p class="eyebrow">YOUR RECENT RHYTHM</p><h2>Small check-ins count.</h2></div><span class="streak" id="streak">✦ 0 day streak</span></div>
+        <div class="history-bars"><div><i style="height:54%"></i><span>Mon</span></div><div><i style="height:72%"></i><span>Tue</span></div><div><i style="height:43%"></i><span>Wed</span></div><div><i style="height:82%"></i><span>Thu</span></div><div class="today"><i style="height:65%"></i><span>Today</span></div><div class="empty"><i></i><span>Sat</span></div><div class="empty"><i></i><span>Sun</span></div></div>
+      </section>
+      <footer>made for gentle days <span>✦</span></footer>
     </main>
-    <script src="app.js?v=4"></script>
+    <script src="app.js?v=5"></script>
   </body>
 </html>
