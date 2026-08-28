@@ -6,6 +6,10 @@ const moods = {
 };
 const $ = (id) => document.getElementById(id);
 const LOCAL_CHECKINS_KEY = "rara-mood-checkins";
+if (new URLSearchParams(window.location.search).get("reset") === "1") {
+  localStorage.removeItem(LOCAL_CHECKINS_KEY);
+  window.history.replaceState({}, "", window.location.pathname);
+}
 function dayKey(date) { const value = new Date(date); return `${value.getFullYear()}-${value.getMonth()}-${value.getDate()}`; }
 function calculateStreak(rows) {
   const days = new Set(rows.map((row) => dayKey(row.created_at || row.date)));
