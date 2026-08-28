@@ -7,6 +7,44 @@ const moods = {
 const SUPABASE_URL = "https://lbcubdivdriyauwqjrpc.supabase.co";
 const SUPABASE_KEY = "sb_publishable_teySu7QZtls5z8EZmNscxw_5C-yMsY8";
 const $ = (id) => document.getElementById(id);
+const LOCAL_CHECKINS_KEY = "rara-mood-checkins";
+
+function dayKey(date) {
+  const value = new Date(date);
+  return `${value.getFullYear()}-${value.getMonth()}-${value.getDate()}`;
+}
+
+function calculateStreak(rows) {
+  const days = new Set(rows.map((row) => dayKey(row.created_at || row.date)));
+  const today = new Date();
+  let streak = 0;
+  const cursor = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  while (days.has(dayKey(cursor))) {
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
+}
+
+function renderStreak(rows) {
+  const count = calculateStreak(rows);
+  $("streak").textContent = `✦ ${count} day${count === 1 ? "" : "s"} streak`;
+}
+
+async function loadStreak() {
+  const localRows = JSON.parse(localStorage.getItem(LOCAL_CHECKINS_KEY) || "[]");
+  renderStreak(localRows);
+  try {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/mood_responses?select=created_at&order=created_at.desc`, {
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+    });
+    if (response.ok) {
+      renderStreak(await response.json());
+    }
+  } catch (error) {
+    console.error("Unable to load mood streak:", error);
+  }
+}
 document.querySelectorAll(".mood-option").forEach((button) => button.addEventListener("click", () => {
   const mood = moods[button.dataset.mood];
   document.querySelectorAll(".mood-option").forEach((item) => item.classList.toggle("active", item === button));
@@ -40,6 +78,10 @@ saveButton.addEventListener("click", async () => {
     if (!response.ok) {
       throw new Error(`Supabase returned ${response.status}`);
     }
+    const checkins = JSON.parse(localStorage.getItem(LOCAL_CHECKINS_KEY) || "[]");
+    checkins.push({ created_at: new Date().toISOString() });
+    localStorage.setItem(LOCAL_CHECKINS_KEY, JSON.stringify(checkins));
+    renderStreak(checkins);
     $("savedMessage").textContent = "Saved securely to your mood journal.";
     saveButton.textContent = "Saved ✓";
   } catch (error) {
@@ -51,3 +93,4 @@ saveButton.addEventListener("click", async () => {
   }
 });
 $("themeButton").addEventListener("click", () => document.body.classList.toggle("dark"));
+loadStreak();
