@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catman - I Miss You</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0a1428 0%, #1a3a52 50%, #0d1f2d 100%);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Batman-style background pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(30, 144, 255, 0.03) 0px,
+                    rgba(30, 144, 255, 0.03) 1px,
+                    transparent 1px,
+                    transparent 2px
+                );
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .heart {
+            font-size: 100px;
+            animation: float 3s ease-in-out infinite;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 0 15px rgba(30, 144, 255, 0.6));
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        h1 {
+            font-size: 4rem;
+            color: #1e90ff;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #1e90ff, 0 0 40px #0066cc, 2px 2px 10px rgba(0, 0, 0, 0.8);
+            animation: fadeInDown 1s ease;
+            font-weight: bold;
+            letter-spacing: 3px;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: #87ceeb;
+            margin-bottom: 40px;
+            animation: fadeInUp 1s ease;
+            text-shadow: 0 0 10px rgba(30, 144, 255, 0.5);
+        }
+
+        .days-counter {
+            font-size: 2.5rem;
+            color: #1e90ff;
+            font-weight: bold;
+            margin: 30px 0;
+            padding: 20px 40px;
+            background: rgba(30, 144, 255, 0.1);
+            border: 3px solid #1e90ff;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            animation: fadeInUp 1.2s ease;
+            box-shadow: 0 0 20px rgba(30, 144, 255, 0.3), inset 0 0 20px rgba(30, 144, 255, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 50px;
+            flex-wrap: wrap;
+            animation: fadeInUp 1.4s ease;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            border: 2px solid #1e90ff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: rgba(30, 144, 255, 0.1);
+            font-family: 'Courier New', monospace;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e90ff 0%, #0066cc 100%);
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(30, 144, 255, 0.5);
+            border-color: #1e90ff;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0066cc 0%, #1e90ff 100%);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 0 25px rgba(30, 144, 255, 0.8), 0 10px 30px rgba(30, 144, 255, 0.3);
+            border-color: #87ceeb;
+        }
+
+        .btn-secondary {
+            background: rgba(0, 102, 204, 0.2);
+            color: #87ceeb;
+            border: 2px solid #87ceeb;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(30, 144, 255, 0.3);
+            color: #ffffff;
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(30, 144, 255, 0.6);
+            border-color: #1e90ff;
+        }
+
+        .message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #1a3a52 0%, #0d1f2d 100%);
+            padding: 40px;
+            border-radius: 10px;
+            border: 2px solid #1e90ff;
+            box-shadow: 0 0 30px rgba(30, 144, 255, 0.5), inset 0 0 20px rgba(30, 144, 255, 0.1);
+            max-width: 500px;
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        .message.active {
+            display: block;
+        }
+
+        .message h2 {
+            color: #1e90ff;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(30, 144, 255, 0.5);
+        }
+
+        .message p {
+            color: #87ceeb;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .message-close {
+            background: linear-gradient(135deg, #1e90ff 0%, #0066cc 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .message-close:hover {
+            background: linear-gradient(135deg, #0066cc 0%, #1e90ff 100%);
+            box-shadow: 0 0 15px rgba(30, 144, 255, 0.6);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 900;
+            display: none;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -60%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .floating-hearts {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .float-heart {
+            position: absolute;
+            font-size: 30px;
+            animation: float-up 4s ease-in infinite;
+            opacity: 0.6;
+            filter: drop-shadow(0 0 8px rgba(30, 144, 255, 0.5));
+        }
+
+        @keyframes float-up {
+            to {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .response-display {
+            margin: 40px 0;
+            padding: 30px;
+            background: rgba(30, 144, 255, 0.15);
+            border: 3px solid #1e90ff;
+            border-radius: 10px;
+            animation: fadeInUp 1.3s ease;
+            box-shadow: 0 0 20px rgba(30, 144, 255, 0.3), inset 0 0 20px rgba(30, 144, 255, 0.1);
+        }
+
+        .response-display p {
+            color: #87ceeb;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(30, 144, 255, 0.5);
+        }
+
+        .counter-display {
+            font-size: 5rem;
+            font-weight: bold;
+            color: #1e90ff;
+            text-shadow: 0 0 20px #1e90ff, 0 0 40px rgba(30, 144, 255, 0.5);
+            animation: pulse 1s ease-in-out;
+            font-family: 'Courier New', monospace;
+        }
+
+        .counter-display.pulse-animation {
+            animation: counter-pulse 0.6s ease-in-out;
+        }
+
+        @keyframes counter-pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        .response-log {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #1a3a52 0%, #0d1f2d 100%);
+            padding: 20px;
+            border: 2px solid #1e90ff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(30, 144, 255, 0.4), inset 0 0 15px rgba(30, 144, 255, 0.1);
+            max-height: 300px;
+            width: 280px;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .response-log h3 {
+            color: #1e90ff;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            text-shadow: 0 0 10px rgba(30, 144, 255, 0.5);
+        }
+
+        .response-item {
+            font-size: 0.85rem;
+            color: #87ceeb;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(30, 144, 255, 0.3);
+        }
+
+        .response-item:last-child {
+            border-bottom: none;
+        }
+
+        .response-time {
+            color: #0099cc;
+            font-size: 0.75rem;
+        }
+
+        .download-btn {
+            width: 100%;
+            margin-top: 10px;
+            background: linear-gradient(135deg, #1e90ff 0%, #0066cc 100%);
+            color: white;
+            padding: 8px;
+            border: 2px solid #1e90ff;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .download-btn:hover {
+            background: linear-gradient(135deg, #0066cc 0%, #1e90ff 100%);
+            box-shadow: 0 0 15px rgba(30, 144, 255, 0.5);
+        }
+
+        .mailbox-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #1a3a52 0%, #0d1f2d 100%);
+            padding: 30px;
+            border: 2px solid #1e90ff;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(30, 144, 255, 0.5), inset 0 0 20px rgba(30, 144, 255, 0.1);
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        .mailbox-modal.active {
+            display: block;
+        }
+
+        .mailbox-modal h2 {
+            color: #1e90ff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-shadow: 0 0 10px rgba(30, 144, 255, 0.5);
+        }
+
+        .mailbox-modal h3 {
+            color: #1e90ff !important;
+            text-shadow: 0 0 10px rgba(30, 144, 255, 0.5) !important;
+        }
+
+        .mailbox-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(135deg, #1e90ff 0%, #0066cc 100%);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 0 0 10px rgba(30, 144, 255, 0.5);
+        }
+
+        .mailbox-close:hover {
+            background: linear-gradient(135deg, #0066cc 0%, #1e90ff 100%);
+            box-shadow: 0 0 15px rgba(30, 144, 255, 0.8);
+        }
+
+        .message-form {
+            background: rgba(30, 144, 255, 0.1);
+            padding: 20px;
+            border: 2px solid #1e90ff;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 15px rgba(30, 144, 255, 0.1);
+        }
+
+        .message-form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #1e90ff;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 80px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            background: rgba(13, 31, 45, 0.8);
+            color: #87ceeb;
+        }
+
+        .message-form textarea::placeholder {
+            color: #0099cc;
+        }
+
+        .message-form textarea:focus {
+            outline: none;
+            border-color: #87ceeb;
+            box-shadow: 0 0 15px rgba(30, 144, 255, 0.6), inset 0 0 10px rgba(30, 144, 255, 0.1);
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .form-buttons button {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #1e90ff;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            background: rgba(30, 144, 255, 0.1);
+            color: #87ceeb;
+            font-family: 'Courier New', monospace;
+        }
+
+        .btn-save-message {
+            background: linear-gradient(135deg, #1e90ff 0%, #0066cc 100%);
+            color: white;
+            border-color: #1e90ff;
+        }
+
+        .btn-save-message:hover {
+            background: linear-gradient(135deg, #0066cc 0%, #1e90ff 100%);
+            box-shadow: 0 0 15px rgba(30, 144, 255, 0.6);
+        }
+
+        .btn-cancel-message {
+            background: rgba(0, 102, 204, 0.2);
+            color: #87ceeb;
+            border-color: #0099cc;
+        }
+
+        .btn-cancel-message:hover {
+            background: rgba(30, 144, 255, 0.3);
+            box-shadow: 0 0 10px rgba(30, 144, 255, 0.5);
+        }
+
+        .messages-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message-item {
+            background: rgba(30, 144, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #1e90ff;
+            position: relative;
+            box-shadow: inset 0 0 10px rgba(30, 144, 255, 0.1);
+        }
+
+        .message-content {
+            color: #87ceeb;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .message-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #0099cc;
+        }
+
+        .message-delete {
+            background: linear-gradient(135deg, #0066cc 0%, #1e90ff 100%);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .message-delete:hover {
+            box-shadow: 0 0 10px rgba(30, 144, 255, 0.6);
+        }
+
+        .no-messages {
+            text-align: center;
+            color: #0099cc;
+            padding: 30px;
+            font-size: 1.1rem;
+        }
+
+        .mailbox-btn {
+            background: linear-gradient(135deg, #1e90ff 0%, #0066cc 100%) !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 15px rgba(30, 144, 255, 0.5) !important;
+        }
+
+        .mailbox-btn:hover {
+            background: linear-gradient(135deg, #0066cc 0%, #1e90ff 100%) !important;
+            box-shadow: 0 0 25px rgba(30, 144, 255, 0.8) !important;
+        }
+
+        .mailbox-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff4444 100%);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.6);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 1.2rem;
+            }
+
+            .days-counter {
+                font-size: 2rem;
+            }
+
+            button {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+
+            .response-log {
+                width: 250px;
+                font-size: 0.8rem;
+            }
+
+            .mailbox-modal {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-hearts" id="floatingHearts"></div>
+    
+    <div class="overlay" id="overlay"></div>
+    
+    <div class="message" id="message">
+        <h2 id="messageTitle">Message</h2>
+        <p id="messageText">Message content goes here</p>
+        <button class="message-close" onclick="closeMessage()">Close</button>
+    </div>
+
+    <div class="mailbox-modal" id="mailboxModal">
+        <button class="mailbox-close" onclick="closeMailbox()">×</button>
+        <h2>📬 Catnip Box - Feline Messages</h2>
+        
+        <div class="message-form">
+            <textarea id="messageInput" placeholder="What did my kitty say? 🐱"></textarea>
+            <div class="form-buttons">
+                <button class="btn-save-message" onclick="saveMessage()">💾 Pounce Save</button>
+                <button class="btn-cancel-message" onclick="clearMessageInput()">Clear</button>
+            </div>
+        </div>
+
+        <h3 style="color: #1e90ff; margin: 20px 0 15px 0;">Saved Meows 🐱</h3>
+        <div class="messages-container" id="messagesContainer">
+            <div class="no-messages">No meows yet...</div>
+        </div>
+    </div>
+
+    <div class="response-log" id="responseLog">
+        <h3>� Meows <span class="response-counter" id="responseCount">0</span></h3>
+        <div id="responseList"></div>
+        <button class="download-btn" onclick="downloadResponses()">⬇️ Export Log</button>
+    </div>
+
+    <div class="container">
+        <div class="heart">🐱</div>
+        <h1>CATMAN</h1>
+        <p class="subtitle">Missing my beloved feline sidekick</p>
+        
+        <div class="days-counter">
+            <span id="daysCount">0</span> Days
+        </div>
+
+        <div class="response-display">
+            <p>� Times She Meowed Back:</p>
+            <div class="counter-display" id="counterDisplay">0</div>
+        </div>
+
+        <div class="button-group">
+            <button class="btn-primary" onclick="showMessage('thoughts', 'Just thinking about you right now...')">
+                💭 Thinking of You
+            </button>
+            <button class="btn-primary" onclick="showMessage('message', 'Hope you\\'re doing well. I really miss you!')">
+                💌 Send a Message
+            </button>
+            <button class="btn-secondary" onclick="toggleCountdown()">
+                📅 <span id="toggleText">Start</span> Countdown
+            </button>
+            <button class="btn-primary" onclick="recordResponse()">
+                🐱 Meow Back!
+            </button>
+            <button class="btn-primary mailbox-btn" onclick="openMailbox()" style="position: relative;">
+                📬 Catnip Box
+                <span class="mailbox-badge" id="mailboxBadge" style="display: none;">0</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let lastDate = localStorage.getItem('lastMissedDate');
+        let countdownActive = localStorage.getItem('countdownActive') === 'true';
+        let responses = JSON.parse(localStorage.getItem('responses')) || [];
+        let mailboxMessages = JSON.parse(localStorage.getItem('mailboxMessages')) || [];
+
+        // Initialize last missed date if not set
+        if (!lastDate) {
+            lastDate = new Date().toISOString().split('T')[0];
+            localStorage.setItem('lastMissedDate', lastDate);
+        }
+
+        // Generate random floating hearts
+        function createFloatingHearts() {
+            const container = document.getElementById('floatingHearts');
+            const hearts = ['🐱', '😻', '😸', '😹', '😺'];
+            
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.className = 'float-heart';
+                    heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+                    heart.style.left = Math.random() * 100 + '%';
+                    heart.style.animationDuration = (3 + Math.random() * 2) + 's';
+                    heart.style.animationDelay = Math.random() * 2 + 's';
+                    container.appendChild(heart);
+
+                    setTimeout(() => heart.remove(), 5000);
+                }, i * 200);
+            }
+        }
+
+        // Update days counter
+        function updateDaysCount() {
+            const today = new Date(lastDate);
+            const now = new Date();
+            const diffTime = Math.abs(now - today);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            document.getElementById('daysCount').textContent = diffDays;
+        }
+
+        // Show message modal
+        function showMessage(type, text) {
+            const messages = {
+                'thoughts': {
+                    title: '💭 Thinking of You',
+                    text: 'Right now, in this very moment, I\'m thinking about you. Your purr, your soft paws, and all those little cat things that make you special. I miss you more than words can say. 🐱'
+                },
+                'message': {
+                    title: '💌 Missing My Feline Friend',
+                    text: 'I hope you\'re doing well wherever you are. Know that you\'re always on my mind. The distance doesn\'t change how much you mean to me. I really miss you, my little furry companion. 🐱'
+                }
+            };
+
+            const msg = messages[type] || { title: 'Message', text: text };
+            document.getElementById('messageTitle').textContent = msg.title;
+            document.getElementById('messageText').textContent = msg.text;
+            document.getElementById('message').classList.add('active');
+            document.getElementById('overlay').classList.add('active');
+            createFloatingHearts();
+        }
+
+        // Close message modal
+        function closeMessage() {
+            document.getElementById('message').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+        }
+
+        // Toggle countdown
+        function toggleCountdown() {
+            countdownActive = !countdownActive;
+            localStorage.setItem('countdownActive', countdownActive);
+            document.getElementById('toggleText').textContent = countdownActive ? 'Stop' : 'Start';
+            
+            if (countdownActive) {
+                showMessage('countdown', 'Countdown started! Keep checking back. ⏳');
+            }
+        }
+
+        // Update response log display
+        function updateResponseLog() {
+            const counterDisplay = document.getElementById('counterDisplay');
+            counterDisplay.textContent = responses.length;
+            document.getElementById('responseCount').textContent = responses.length;
+            
+            const responseList = document.getElementById('responseList');
+            responseList.innerHTML = '';
+
+            responses.slice().reverse().forEach((resp, index) => {
+                const item = document.createElement('div');
+                item.className = 'response-item';
+                item.innerHTML = `<div>Response #${responses.length - index}</div><div class="response-time">${resp.time}</div>`;
+                responseList.appendChild(item);
+            });
+        }
+
+        // Record a response
+        function recordResponse() {
+            const now = new Date();
+            const timestamp = now.toLocaleString();
+            const response = {
+                time: timestamp,
+                date: now.toISOString().split('T')[0]
+            };
+
+            responses.push(response);
+            localStorage.setItem('responses', JSON.stringify(responses));
+            
+            // Trigger animation
+            const counterDisplay = document.getElementById('counterDisplay');
+            counterDisplay.classList.remove('pulse-animation');
+            void counterDisplay.offsetWidth; // Trigger reflow to restart animation
+            counterDisplay.classList.add('pulse-animation');
+            
+            updateResponseLog();
+            createFloatingHearts();
+            
+            // Show confirmation
+            showMessage('response', '✨ Meow received! You made my day! 🐱✨');
+        }
+
+        // Download responses as text file
+        function downloadResponses() {
+            if (responses.length === 0) {
+                alert('No responses recorded yet. 💔');
+                return;
+            }
+
+            let content = 'I MISS YOU - Response Log\n';
+            content += '='.repeat(40) + '\n\n';
+            content += `Total Responses: ${responses.length}\n\n`;
+            
+            responses.forEach((resp, index) => {
+                content += `Response #${index + 1}\n`;
+                content += `Time: ${resp.time}\n`;
+                content += '-'.repeat(40) + '\n';
+            });
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `responses_${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+
+        // Close overlay on click
+        document.getElementById('overlay').addEventListener('click', function() {
+            closeMessage();
+            closeMailbox();
+        });
+
+        // Mailbox Functions
+        function openMailbox() {
+            document.getElementById('mailboxModal').classList.add('active');
+            document.getElementById('overlay').classList.add('active');
+            updateMailboxDisplay();
+        }
+
+        function closeMailbox() {
+            document.getElementById('mailboxModal').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+        }
+
+        function saveMessage() {
+            const input = document.getElementById('messageInput');
+            const messageText = input.value.trim();
+
+            if (messageText === '') {
+                alert('Please write a message! 💌');
+                return;
+            }
+
+            const now = new Date();
+            const message = {
+                text: messageText,
+                time: now.toLocaleString(),
+                date: now.toISOString().split('T')[0],
+                id: Date.now()
+            };
+
+            mailboxMessages.push(message);
+            localStorage.setItem('mailboxMessages', JSON.stringify(mailboxMessages));
+            
+            input.value = '';
+            updateMailboxDisplay();
+            createFloatingHearts();
+            
+            // Show confirmation
+            showMessage('mail', '� Meow saved to your Catnip Box! 🐱');
+        }
+
+        function clearMessageInput() {
+            document.getElementById('messageInput').value = '';
+        }
+
+        function deleteMessage(id) {
+            if (confirm('Delete this message? 💔')) {
+                mailboxMessages = mailboxMessages.filter(msg => msg.id !== id);
+                localStorage.setItem('mailboxMessages', JSON.stringify(mailboxMessages));
+                updateMailboxDisplay();
+            }
+        }
+
+        function updateMailboxDisplay() {
+            const container = document.getElementById('messagesContainer');
+            const badge = document.getElementById('mailboxBadge');
+
+            // Update badge
+            if (mailboxMessages.length > 0) {
+                badge.textContent = mailboxMessages.length;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+
+            // Display messages
+            if (mailboxMessages.length === 0) {
+                container.innerHTML = '<div class="no-messages">No messages yet...</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            mailboxMessages.slice().reverse().forEach((msg) => {
+                const item = document.createElement('div');
+                item.className = 'message-item';
+                item.innerHTML = `
+                    <div class="message-content">${escapeHtml(msg.text)}</div>
+                    <div class="message-meta">
+                        <span>📅 ${msg.time}</span>
+                        <button class="message-delete" onclick="deleteMessage(${msg.id})">Delete</button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize
+        updateDaysCount();
+        updateResponseLog();
+        updateMailboxDisplay();
+        if (countdownActive) {
+            document.getElementById('toggleText').textContent = 'Stop';
+        }
+
+        // Update days count every minute
+        setInterval(updateDaysCount, 60000);
+    </script>
+</body>
+</html>
