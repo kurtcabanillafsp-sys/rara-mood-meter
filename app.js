@@ -8,7 +8,10 @@ const SUPABASE_URL = "https://lbcubdivdriyauwqjrpc.supabase.co";
 const SUPABASE_KEY = "sb_publishable_teySu7QZtls5z8EZmNscxw_5C-yMsY8";
 const $ = (id) => document.getElementById(id);
 const LOCAL_CHECKINS_KEY = "rara-mood-checkins";
-if (new URLSearchParams(window.location.search).get("reset") === "1") {package;loadRecords;.
+if (new URLSearchParams(window.location.search).get("reset") === "1") {
+  localStorage.removeItem(LOCAL_CHECKINS_KEY);
+  window.history.replaceState({}, "", window.location.pathname);
+}
 function dayKey(date) { const value = new Date(date); return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`; }
 function calculateStreak(rows) {
   const days = new Set(rows.map((row) => dayKey(row.created_at || row.date)));
