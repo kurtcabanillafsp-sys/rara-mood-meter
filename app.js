@@ -35,9 +35,20 @@ function renderHistory(rows) {
 }
 
 async function loadRecords() {
+  // Migrate old local check-ins to ensure streak isn't lost
   const localRows = JSON.parse(localStorage.getItem(LOCAL_CHECKINS_KEY) || "[]");
-  renderStreak(localRows);
-  renderHistory(localRows);
+  const migratedRows = localRows.map(row => {
+    if (!row.created_at && row.date) {
+      return { ...row, created_at: new Date(row.date).toISOString() };
+    }
+    return row;
+  });
+  if (JSON.stringify(migratedRows) !== JSON.stringify(localRows)) {
+    localStorage.setItem(LOCAL_CHECKINS_KEY, JSON.stringify(migratedRows));
+  }
+  
+  renderStreak(migratedRows);
+  renderHistory(migratedRows);
   try {
     const response = await fetch(`${SUPABASE_URL}/rest/v1/mood_responses?select=created_at&order=created_at.desc`, {
       headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
