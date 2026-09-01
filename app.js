@@ -8,6 +8,7 @@ const SUPABASE_URL = "https://lbcubdivdriyauwqjrpc.supabase.co";
 const SUPABASE_KEY = "sb_publishable_teySu7QZtls5z8EZmNscxw_5C-yMsY8";
 const $ = (id) => document.getElementById(id);
 const LOCAL_CHECKINS_KEY = "rara-mood-checkins";
+const LOCAL_PHOTO_KEY = "rara-note-photo";
 if (new URLSearchParams(window.location.search).get("reset") === "1") {
   localStorage.removeItem(LOCAL_CHECKINS_KEY);
   window.history.replaceState({}, "", window.location.pathname);
@@ -106,4 +107,22 @@ saveButton.addEventListener("click", async () => {
   }
 });
 $("themeButton").addEventListener("click", () => document.body.classList.toggle("dark"));
+// Photo upload handler
+$("photoButton").addEventListener("click", () => $("photoUpload").click());
+$("photoUpload").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const photoData = event.target.result;
+      localStorage.setItem(LOCAL_PHOTO_KEY, photoData);
+      $("notePhoto").src = photoData;
+      $("photoButton").textContent = "✎ Change photo";
+    };
+    reader.readAsDataURL(file);
+  }
+});
+// Load saved photo
+const savedPhoto = localStorage.getItem(LOCAL_PHOTO_KEY);
+if (savedPhoto) { $("notePhoto").src = savedPhoto; $("photoButton").textContent = "✎ Change photo"; }
 loadRecords();

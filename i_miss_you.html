@@ -654,12 +654,14 @@
         <h1>CATMAN</h1>
         <p class="subtitle">Missing my beloved feline sidekick</p>
         
-        <div class="days-counter">
-            <span id="daysCount">0</span> Days
+
+        <div class="response-display">
+            <p>🔥 Current Streak:</p>
+            <div class="counter-display" id="streakDisplay">0</div>
         </div>
 
         <div class="response-display">
-            <p>� Times She Meowed Back:</p>
+            <p>😺 Times She Meowed Back:</p>
             <div class="counter-display" id="counterDisplay">0</div>
         </div>
 
@@ -715,13 +717,44 @@
             }
         }
 
-        // Update days counter
-        function updateDaysCount() {
-            const today = new Date(lastDate);
-            const now = new Date();
-            const diffTime = Math.abs(now - today);
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            document.getElementById('daysCount').textContent = diffDays;
+        // Calculate current streak (consecutive days with at least one response)
+        function calculateStreak() {
+            if (responses.length === 0) return 0;
+
+            // Get unique dates from responses
+            const responseDates = [...new Set(responses.map(r => r.date))].sort().reverse();
+            
+            if (responseDates.length === 0) return 0;
+
+            let streak = 0;
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+            
+            let currentDate = new Date(todayStr);
+            
+            while (true) {
+                const dateStr = currentDate.toISOString().split('T')[0];
+                if (responseDates.includes(dateStr)) {
+                    streak++;
+                    currentDate.setDate(currentDate.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+            
+            return streak;
+        }
+
+        // Update streak display
+        function updateStreak() {
+            const streak = calculateStreak();
+            const streakDisplay = document.getElementById('streakDisplay');
+            streakDisplay.textContent = streak;
+            
+            // Trigger animation if streak changed
+            streakDisplay.classList.remove('pulse-animation');
+            void streakDisplay.offsetWidth;
+            streakDisplay.classList.add('pulse-animation');
         }
 
         // Show message modal
@@ -798,6 +831,7 @@
             counterDisplay.classList.add('pulse-animation');
             
             updateResponseLog();
+            updateStreak();
             createFloatingHearts();
             
             // Show confirmation
@@ -930,15 +964,15 @@
         }
 
         // Initialize
-        updateDaysCount();
         updateResponseLog();
+        updateStreak();
         updateMailboxDisplay();
         if (countdownActive) {
             document.getElementById('toggleText').textContent = 'Stop';
         }
 
-        // Update days count every minute
-        setInterval(updateDaysCount, 60000);
+        // Update streak every minute to catch midnight
+        setInterval(updateStreak, 60000);
     </script>
 </body>
 </html>

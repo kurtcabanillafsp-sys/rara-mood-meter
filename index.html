@@ -43,7 +43,14 @@
           <div class="checkin-footer"><span id="savedMessage">Your check-in stays right here.</span><button class="save-button" id="saveButton">Save check-in <span>→</span></button></div>
         </section>
         <aside class="card note-card">
-          <div class="note-orb">✦</div><p class="eyebrow">A NOTE FOR YOU</p><h2>You don't have to<br />earn your rest.</h2><p>Being where you are is enough. Let today be a little lighter than yesterday.</p><div class="note-sign">with care, <b>rara</b> ♡</div>
+          <div class="note-content">
+            <div class="note-orb">✦</div><p class="eyebrow">A NOTE FOR YOU</p><h2>You don't have to<br />earn your rest.</h2><p>Being where you are is enough. Let today be a little lighter than yesterday.</p><div class="note-sign">with care, <b>rara</b> ♡</div>
+          </div>
+          <div class="note-photo-container">
+            <img id="notePhoto" class="note-photo" src="" alt="Photo" />
+            <input type="file" id="photoUpload" accept="image/*" style="display:none;" />
+            <button id="photoButton" class="photo-button" title="Click to add or change photo">+ Add photo</button>
+          </div>
         </aside>
       </div>
       <section class="history">
