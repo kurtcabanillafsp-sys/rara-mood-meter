@@ -12,12 +12,12 @@ if (new URLSearchParams(window.location.search).get("reset") === "1") {
   localStorage.removeItem(LOCAL_CHECKINS_KEY);
   window.history.replaceState({}, "", window.location.pathname);
 }
-function dayKey(date) { const value = new Date(date); return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`; }
+function dayKey(date) { const value = new Date(date); return `${value.getUTCFullYear()}-${String(value.getUTCMonth() + 1).padStart(2, "0")}-${String(value.getUTCDate()).padStart(2, "0")}`; }
 function calculateStreak(rows) {
   const days = new Set(rows.map((row) => dayKey(row.created_at || row.date)));
   const cursor = new Date(); let streak = 0;
-  cursor.setHours(0, 0, 0, 0);
-  while (days.has(dayKey(cursor))) { streak += 1; cursor.setDate(cursor.getDate() - 1); }
+  cursor.setUTCHours(0, 0, 0, 0);
+  while (days.has(dayKey(cursor))) { streak += 1; cursor.setUTCDate(cursor.getUTCDate() - 1); }
   return streak;
 }
 function renderStreak(rows) { const count = calculateStreak(rows); $("streak").textContent = `✦ ${count} day${count === 1 ? "" : "s"} streak`; }
